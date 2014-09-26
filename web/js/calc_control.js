@@ -1,7 +1,34 @@
 /* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Manejador de la Calculadora
+ * 
  */
+CalcuFlujo = {};
+CalcuFlujo = {
+    data : {
+      suma : {
+        precedence: 1,
+        nombre: 'suma',
+        //operation: function (a, b) {return a + b;},
+        serviceURL: '',                
+        buttonHTML: '+' 
+      }  
+    },
+    
+    operacion : function (data) {
+        
+    },
+    
+    setEvents: function () {
+        
+    },
+    
+    init : function () {
+        console.log('init calcu flujo.');
+        this.$display = $('article .calculator .display-text');
+        this.displayContet = '';
+    }
+};
 
-
+$(function () {
+    CalcuFlujo.init();
+});
