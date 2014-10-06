@@ -1,22 +1,57 @@
 /* 
  * Manejador de la Calculadora
+ * Kener Fernandez
  * 
  */
 var CalcuFlujo = {};
 CalcuFlujo = {
     data : {
       suma : {
-        prioridad: 1,
+        prioridad: 3,
         nombre: 'suma',
-        //operation: function (a, b) {return a + b;},
-        serviceURL: '/rest/calc/suma/',                
-        buttonHTML: '+'
-      }  
+        serviceURL: '/CalcuRESTful/rest/calc/suma/',                
+        boton: '+',
+        left: NaN,
+        right: NaN
+      },
+      
+      resta : {
+        prioridad: 3,
+        nombre: 'resta',
+        serviceURL: '/CalcuRESTful/rest/calc/resta/',                
+        boton: '-',
+        left: NaN,
+        right: NaN
+      },
+      
+      div : {
+        prioridad: 2,
+        nombre: 'dividir',
+        serviceURL: '/CalcuRESTful/rest/calc/dividir/',                
+        boton: '/',
+        left: NaN,
+        right: NaN
+      },
+      
+      multi : {
+        prioridad: 2,
+        nombre: 'multiplica',
+        serviceURL: '/CalcuRESTful/rest/calc/multiplica/',                
+        boton: 'x',
+        left: NaN,
+        right: NaN
+      }
+      
+      //todas las otras operaciones son prioridad 1, raiz, sen, cos, tan
     },
     
-    operacion : function (data) {
-        
-    },
+    //array de operaciones, para cuando hay operaciones combinadas
+    operaciones: [],
+    
+    operacionActual: {},
+    
+    // numero digitado antes o despues de un operador
+    numeroActual: '',
     
     updateDisplay : function (add) {
         if (this.$display.text() === '0' && (add !== '.')){
@@ -31,12 +66,110 @@ CalcuFlujo = {
         e.preventDefault();
         console.log("onNumberCliked: " +  $(e.currentTarget).text());
         this.updateDisplay($(e.currentTarget).text());
+        this.numeroActual = this.numeroActual + $(e.currentTarget).text();
     },
     
     onOperationClicked : function (e) {
         e.preventDefault();
         console.log("onOperationClicked: " +  $(e.currentTarget).text());
         
+        if (this.operacionActual.boton && (this.operacionActual.boton === $(e.currentTarget).text())) {
+            return;
+        }  
+        
+        if (Object.keys(this.operacionActual).length !== 0){
+           this.operacionActual.right = this.numeroActual;
+           this.operaciones.push(this.operacionActual);
+           this.operacionActual = {};
+        }
+        
+        switch ($(e.currentTarget).text()) {
+            case '+':
+                if (Object.keys(this.operacionActual).length === 0){
+                    this.operacionActual = this.data.suma;
+                    this.operacionActual.left = this.numeroActual;
+                    this.numeroActual = '';
+                    this.updateDisplay('+');
+                }
+            break;
+            
+            case '-': 
+                if (Object.keys(this.operacionActual).length === 0){
+                    this.operacionActual = this.data.resta;
+                    this.operacionActual.left = this.numeroActual;
+                    this.numeroActual = '';
+                    this.updateDisplay('-');
+                }
+            break;
+            
+            case '/':
+                if (Object.keys(this.operacionActual).length === 0){
+                    this.operacionActual = this.data.div;
+                    this.operacionActual.left = this.numeroActual;
+                    this.numeroActual = '';
+                    this.updateDisplay('/');
+                }
+            break;
+            
+            case 'x': 
+                if (Object.keys(this.operacionActual).length === 0){
+                    this.operacionActual = this.data.multi;
+                    this.operacionActual.left = this.numeroActual;
+                    this.numeroActual = '';
+                    this.updateDisplay('x');
+                }
+            break;
+            
+            case '=':  
+                this.operacionActual = {};
+                if(this.operaciones.length !== 0){
+                    this.ejecutarOperaciones();
+                }
+            break;
+        }
+        
+    },
+    
+    ejecutarOperaciones: function () {
+        //ordenar el array segun la prioridad de la operacion si hay mas de 1     
+        //bloquear los botones
+        if (this.operaciones.length > 1){
+            this.operaciones.sort(function(a,b) { return parseFloat(a.prioridad) - parseFloat(b.prioridad); } );            
+            //llamar los servicios de las operaciones
+        }
+        else {
+            //solo hay una operacion ejecutar esa
+            this.ejecutarOperacion(this.operaciones[0]);
+        }                
+    },
+    
+    ejecutarOperacion: function (data) {
+        var params = '';
+        if (data.prioridad === 2 || data.prioridad === 3) {
+            params = 'left='+data.left+'&right='+data.right;
+        }
+        else {
+            //es una operacion de un parametro
+        }
+        
+        $.ajax({
+            type: 'get',
+            url: data.serviceURL,
+            data: params,
+            success: $.proxy(this.operacionCompleta, this)
+        });
+    },
+    
+    operacionCompleta : function (data){
+        if (this.operaciones.length === 1){
+            this.$display.text(data);
+            this.numeroActual = data;
+            this.operaciones = [];
+        }
+        else{
+            //remover del array la opereacion realizada y llamar la siguiente
+            //ademas acumular el resultado
+        }
     },
     
     clearDisplay: function (e){

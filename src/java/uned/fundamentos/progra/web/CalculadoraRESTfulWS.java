@@ -47,4 +47,46 @@ public class CalculadoraRESTfulWS {
     {
         return left + right;
     }
+    
+    /**
+     *
+     * @param left cantidad a la izquierda de la operacion
+     * @param right cantidad a la derecha de la oepracion
+     * @return
+     */
+    @Path("resta")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public int resta(@QueryParam("left") int left, @QueryParam("right") int right)
+    {
+        return left - right;
+    }
+    
+    /**
+     *
+     * @param left cantidad a la izquierda de la operacion
+     * @param right cantidad a la derecha de la oepracion
+     * @return
+     */
+    @Path("multiplica")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public int multiplica(@QueryParam("left") int left, @QueryParam("right") int right)
+    {
+        return left * right;
+    }
+    
+    /**
+     *
+     * @param left cantidad a la izquierda de la operacion
+     * @param right cantidad a la derecha de la oepracion
+     * @return
+     */
+    @Path("dividir")
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public int dividir(@QueryParam("left") int left, @QueryParam("right") int right)
+    {
+        return left / right;
+    }
 }
